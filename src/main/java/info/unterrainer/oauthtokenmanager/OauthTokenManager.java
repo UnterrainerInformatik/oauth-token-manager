@@ -102,7 +102,6 @@ public class OauthTokenManager {
 
 			try {
 				tokenVerifier.verify();
-				throw new ForbiddenException();
 			} catch (VerificationException e) {
 				throw new ForbiddenException();
 			}
