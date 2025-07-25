@@ -29,9 +29,6 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class OauthTokenManager {
 
-	public String accessToken = null;
-	public String refreshToken = null;
-
 	private final String host;
 	private final String realm;
 
@@ -121,8 +118,10 @@ public class OauthTokenManager {
 
 		try {
 			TokenVerifier<AccessToken> tokenVerifier = TokenVerifier.create(authorizationHeader, AccessToken.class);
-			AccessToken token = tokenVerifier.getToken();
-			if (!token.isActive()) {
+			RemoteOauthToken remoteAccessToken = RemoteOauthToken.builder()
+					.accessToken(tokenVerifier.getToken())
+					.build();
+			if (!remoteAccessToken.getAccessToken().isActive()) {
 				log.warn("Token is inactive.");
 				return null;
 			}
@@ -139,7 +138,8 @@ public class OauthTokenManager {
 		}
 	}
 
-	public void getTokensFromCredentials(String clientId, String clientSecret, String username, String password) {
+	public LocalOauthTokens getTokensFromCredentials(String clientId, String clientSecret, String username,
+			String password) {
 		try {
 			String tokenEndpoint = host;
 			if (!tokenEndpoint.endsWith("/"))
@@ -166,12 +166,14 @@ public class OauthTokenManager {
 
 			ObjectMapper mapper = new ObjectMapper();
 			JsonNode json = mapper.readTree(response.body());
-			accessToken = json.get("access_token").asText();
-			refreshToken = json.get("refresh_token").asText();
-
 			log.info("Token received successfully.");
 			log.debug("Access token: {}", json.get("access_token").asText());
 			log.debug("Refresh token: {}", json.get("refresh_token").asText());
+
+			return LocalOauthTokens.builder()
+					.accessToken(json.get("access_token").asText())
+					.refreshToken(json.get("refresh_token").asText())
+					.build();
 
 		} catch (Exception e) {
 			log.error("Error obtaining tokens from Keycloak.", e);

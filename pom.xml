@@ -9,8 +9,8 @@
 	</parent>
 
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>Oauth-Token-Manager</artifactId>
-	<version>1.0.0</version>
+	<artifactId>oauth-token-manager</artifactId>
+	<version>1.0.4</version>
 	<name>OauthTokenManager</name>
 	<packaging>jar</packaging>
 	
