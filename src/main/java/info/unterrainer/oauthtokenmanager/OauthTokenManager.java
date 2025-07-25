@@ -173,8 +173,6 @@ public class OauthTokenManager {
 			log.debug("Access token: {}", json.get("access_token").asText());
 			log.debug("Refresh token: {}", json.get("refresh_token").asText());
 
-			return json;
-
 		} catch (Exception e) {
 			log.error("Error obtaining tokens from Keycloak.", e);
 			throw new IllegalStateException("Unable to get token", e);
