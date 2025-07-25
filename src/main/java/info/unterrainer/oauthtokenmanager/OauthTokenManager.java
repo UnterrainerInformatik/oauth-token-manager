@@ -3,9 +3,11 @@ package info.unterrainer.oauthtokenmanager;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.security.spec.RSAPublicKeySpec;
@@ -26,6 +28,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 public class OauthTokenManager {
+
+	public String accessToken = null;
+	public String refreshToken = null;
 
 	private final String host;
 	private final String realm;
@@ -133,4 +138,47 @@ public class OauthTokenManager {
 			return null;
 		}
 	}
+
+	public void getTokensFromCredentials(String clientId, String clientSecret, String username, String password) {
+		try {
+			String tokenEndpoint = host;
+			if (!tokenEndpoint.endsWith("/"))
+				tokenEndpoint += "/";
+			tokenEndpoint += "realms/" + realm + "/protocol/openid-connect/token";
+
+			String form = "grant_type=password" + "&client_id=" + URLEncoder.encode(clientId, StandardCharsets.UTF_8)
+					+ "&username=" + URLEncoder.encode(username, StandardCharsets.UTF_8) + "&password="
+					+ URLEncoder.encode(password, StandardCharsets.UTF_8) + "&client_secret="
+					+ URLEncoder.encode(clientSecret, StandardCharsets.UTF_8);
+
+			HttpRequest request = HttpRequest.newBuilder()
+					.uri(URI.create(tokenEndpoint))
+					.header("Content-Type", "application/x-www-form-urlencoded")
+					.POST(HttpRequest.BodyPublishers.ofString(form))
+					.build();
+
+			HttpClient client = HttpClient.newHttpClient();
+			HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+			if (response.statusCode() >= 300) {
+				throw new IOException("Token request failed: HTTP " + response.statusCode() + " - " + response.body());
+			}
+
+			ObjectMapper mapper = new ObjectMapper();
+			JsonNode json = mapper.readTree(response.body());
+			accessToken = json.get("access_token").asText();
+			refreshToken = json.get("refresh_token").asText();
+
+			log.info("Token received successfully.");
+			log.debug("Access token: {}", json.get("access_token").asText());
+			log.debug("Refresh token: {}", json.get("refresh_token").asText());
+
+			return json;
+
+		} catch (Exception e) {
+			log.error("Error obtaining tokens from Keycloak.", e);
+			throw new IllegalStateException("Unable to get token", e);
+		}
+	}
+
 }
