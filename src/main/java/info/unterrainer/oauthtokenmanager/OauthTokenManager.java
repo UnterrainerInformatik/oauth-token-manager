@@ -138,6 +138,10 @@ public class OauthTokenManager {
 		}
 	}
 
+	public LocalOauthTokens getTokensFromCredentials(String clientId, String username, String password) {
+		return getTokensFromCredentials(clientId, null, username, password);
+	}
+
 	public LocalOauthTokens getTokensFromCredentials(String clientId, String clientSecret, String username,
 			String password) {
 		try {
@@ -148,8 +152,10 @@ public class OauthTokenManager {
 
 			String form = "grant_type=password" + "&client_id=" + URLEncoder.encode(clientId, StandardCharsets.UTF_8)
 					+ "&username=" + URLEncoder.encode(username, StandardCharsets.UTF_8) + "&password="
-					+ URLEncoder.encode(password, StandardCharsets.UTF_8) + "&client_secret="
-					+ URLEncoder.encode(clientSecret, StandardCharsets.UTF_8);
+					+ URLEncoder.encode(password, StandardCharsets.UTF_8);
+			if (clientSecret != null) {
+				form += "&client_secret=" + URLEncoder.encode(clientSecret, StandardCharsets.UTF_8);
+			}
 
 			HttpRequest request = HttpRequest.newBuilder()
 					.uri(URI.create(tokenEndpoint))
