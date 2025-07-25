@@ -116,6 +116,9 @@ public class OauthTokenManager {
 		if (authorizationHeader == null || authorizationHeader.isBlank())
 			return null;
 
+		if (authorizationHeader.toLowerCase().startsWith("bearer "))
+			authorizationHeader = authorizationHeader.substring(7);
+
 		try {
 			TokenVerifier<AccessToken> tokenVerifier = TokenVerifier.create(authorizationHeader, AccessToken.class);
 			RemoteOauthToken remoteAccessToken = RemoteOauthToken.builder()
@@ -127,8 +130,8 @@ public class OauthTokenManager {
 			}
 			// Disabled to enable getting token from side-channels like 'localhost'.
 			/*
-			 * if (!token.getIssuer().equalsIgnoreCase(authUrl)) {
-			 * setTokenRejectionReason(ctx, "Token has wrong real-url."); return null; }
+			 * if (!remoteAccessToken.getIssuer().equalsIgnoreCase(authUrl)) {
+			 * log.warn("Token has wrong real-url."); return null; }
 			 */
 			return tokenVerifier;
 
