@@ -23,12 +23,16 @@
 hs_err_pid*
 /target/
 
-src/main/java/info/unterrainer/commons/jreutils/Information.java
+src/main/java/info/unterrainer/commons/oauthtokenmanager/Information.java
 
 .settings/
 
 .classpath
 
+/bin/
+
 bin/
+
+.vscode/
 
 dependency-reduced-pom.xml
