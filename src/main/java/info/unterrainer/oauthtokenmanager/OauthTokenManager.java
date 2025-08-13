@@ -91,7 +91,6 @@ public class OauthTokenManager {
 	 *
 	 * @param accessToken
 	 * @return tenantId or null if the token is invalid or not present.
-	 * @throws Exception
 	 */
 	public String checkAccess(String accessToken) {
 		try {
