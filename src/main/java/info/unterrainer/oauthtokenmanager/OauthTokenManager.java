@@ -85,7 +85,15 @@ public class OauthTokenManager {
 		return factory.generatePublic(spec);
 	}
 
-	public void checkAccess(String accessToken) {
+	/**
+	 * Checks the access token and verifies its signature. If the token is valid,
+	 * returns a tenantId.
+	 *
+	 * @param accessToken
+	 * @return tenantId or null if the token is invalid or not present.
+	 * @throws Exception
+	 */
+	public String checkAccess(String accessToken) {
 		try {
 			TokenVerifier<AccessToken> tokenVerifier = persistUserInfoInContext(accessToken);
 			if (tokenVerifier == null)
@@ -102,6 +110,8 @@ public class OauthTokenManager {
 
 			try {
 				tokenVerifier.verify();
+				AccessToken token = tokenVerifier.getToken();
+				return (String) token.getOtherClaims().get("tenants_read");
 			} catch (VerificationException e) {
 				throw new ForbiddenException();
 			}
